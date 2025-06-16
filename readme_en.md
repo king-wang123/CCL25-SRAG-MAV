@@ -284,17 +284,23 @@ threshold = 50
 
 def gen_output(item):
     all_responses = []
+
+    def process_retriever_content(retriver_content):
+        retriver_item = test2item[retriver_content]
+        prompt = generate_rag_prompt(item['content'], retriver_item, 'triple')
+        return qwen.response(prompt)
+    
     while True:
         retriver_contents = retriever(texts, item['content'], top_k=integration_num)
-        for retriver_content in retriver_contents:
-            retriver_item = test2item[retriver_content]
-            prompt = generate_rag_prompt(item['content'], retriver_item, 'triple')
-            result = qwen.response(prompt)
-            all_responses.append(result)
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(process_retriever_content, retriver_contents)
+            all_responses.extend(results)
+
         response_counts = Counter(all_responses)
         most_common_list = response_counts.most_common(1)
         actual_most_common_response = most_common_list[0][0]
         count_of_most_common = most_common_list[0][1]
+
         if count_of_most_common >= threshold:
             return actual_most_common_response
 ```

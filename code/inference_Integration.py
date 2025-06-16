@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 
 def retriever(texts, query, top_k=1):
     query_embedding = model.encode(query, convert_to_tensor=True, show_progress_bar=False)
@@ -55,14 +56,18 @@ integration_num = 5
 threshold = 3
 
 def gen_output(item):
+    all_responses = []
+
+    def process_retriever_content(retriver_content):
+        retriver_item = test2item[retriver_content]
+        prompt = generate_rag_prompt(item['content'], retriver_item, 'triple')
+        return qwen.response(prompt)
+    
     while True:
         retriver_contents = retriever(texts, item['content'], top_k=integration_num)
-        all_responses = []
-        for retriver_content in retriver_contents:
-            retriver_item = test2item[retriver_content]
-            prompt = generate_rag_prompt(item['content'], retriver_item, 'triple')
-            result = qwen.response(prompt)
-            all_responses.append(result)
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(process_retriever_content, retriver_contents)
+            all_responses.extend(results)
 
         response_counts = Counter(all_responses)
         most_common_list = response_counts.most_common(1)
