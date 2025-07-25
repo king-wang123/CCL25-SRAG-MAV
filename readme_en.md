@@ -2,6 +2,8 @@
 
 [中文 README](./readme.md)
 
+Paper 📝: [SRAG-MAV for Fine-Grained Chinese Hate Speech Recognition](https://arxiv.org/abs/2507.18580v1)
+
 This repository contains the implementation, technical report, and resources for our system, which achieved second place in the [CCL25-Eval Task 10: Fine-Grained Chinese Hate Speech Recognition](https://tianchi.aliyun.com/competition/entrance/532298). The system includes code for result reproduction, a detailed technical report, and related resources.
 
 We express our gratitude to the CCL25-Eval organizers for providing the evaluation platform and to the authors of the [STATE ToxiCN paper](https://arxiv.org/abs/2501.15451)  for open-sourcing a high-quality fine-grained Chinese hate speech dataset.
